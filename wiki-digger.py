@@ -3,13 +3,15 @@ import time
 from rich.live import Live
 import sys
 from rich.table import Table
+from rich.console import Console
 
+console = Console()
 options = webdriver.ChromeOptions()
 options.add_argument('headless');
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 driver = webdriver.Chrome(options=options)
-
-choice = input("1. Hop from a topic endlessly \n 2. Find out number of hops to reach 'Philosophy'")
+console.log(f"\r[yellow]1. Hop from a topic endlessly \n2. Find out number of hops to reach 'Philosophy'\nYour choice(1 / 2): ")
+choice = input("            ")
 keyword = input("Enter KEYWORD:")
 url = 'https://en.wikipedia.org/wiki/'+keyword
 driver.get(url)
@@ -32,7 +34,7 @@ def generate_table() -> Table:
         table.add_column("Elapsed Time")
         for row in range(1):
             table.add_row(
-                f"{len(visited_list)}",f"{keyword}",f"{y}", f"[red]{status}" if status!='RUNNING' else f"[green]{status}", f" %.4s seconds " % (time.time() - start_time)
+                f"{len(visited_list)}",f"{keyword}",f"[red]{y}" if y!='Philosophy' else f"[green]{y}", f"[red]{status}" if status!='RUNNING' else f"[green]{status}", f" %.4s seconds " % (time.time() - start_time)
             )
         return table
     else:
@@ -55,8 +57,8 @@ status='NOT RUNNING'
 pings=0;
 y=''
 start_time = time.time()
-if(choice==1):
-    print("\nHit CTRL+C to end the program\n");
+if(choice=='1'):
+    console.log(f"[yellow]\n\rHit CTRL+C to end the program\n");
 while check==True:
     with Live(generate_table(), refresh_per_second=4) as live:
         while check==True:
@@ -66,6 +68,7 @@ while check==True:
                 y = driver.find_element_by_xpath('//*[@id="firstHeading"]').text
                 if choice=='2':
                     if 'Philosophy' == y:
+                        live.update(generate_table())
                         sys.exit(0)
                 if y not in visited_nodes:
                     visited_nodes.add(y)
